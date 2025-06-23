@@ -1,0 +1,394 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>afterSchool</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <script src="https://unpkg.com/vue@2.7.8/dist/vue.js"></script>
+  </head>
+
+  <body>
+    <div id="app">
+      <!-- this is the Search Bar -->
+      <input
+        type="text"
+        v-model="searchFilter"
+        placeholder="Search lessons"
+      />
+
+      <header>
+        <h1>{{ nameOfSite }}</h1>
+      </header>
+
+      <button class="checkout-button" v-on:click="toggleCheckout">
+        {{ totalItemsInCart }}
+        <span class="fa-solid fa-cart-shopping"></span>
+        {{ isCheckout ? "Go Back" : "Checkout" }}
+      </button>
+
+      <div v-if="!isCheckout" class="sorting-section">
+        <h2>Sort items by:</h2>
+        <button v-on:click="setSortAttribute('availableStock')">
+          Available Items
+        </button>
+        <button v-on:click="setSortAttribute('price')">Price</button>
+        <button v-on:click="setSortAttribute('location')">Location</button>
+        <button v-on:click="setSortAttribute('title')">Title</button>
+
+        <h2>Order:</h2>
+        <button v-on:click="setSortOrder('asc')">Ascending</button>
+        <button v-on:click="setSortOrder('desc')">Descending</button>
+      </div>
+
+      <!-- this is the Product Page -->
+      <main v-if="!isCheckout">
+        <div
+          v-for="lesson in filteredSearch"
+          :key="lesson.id"
+          class="lesson-box"
+        >
+          <h1>{{ lesson.title }}</h1>
+          <img :src="lesson.image" :alt="lesson.title" />
+          <p><strong>Location:</strong> {{ lesson.location }}</p>
+          <h2>{{ lesson.description }}</h2>
+          <p>Price: £{{ lesson.price }}</p>
+          <p class="available-items">
+            Available Items: {{ lesson.availableStock - itemsInCart(lesson.id) }}
+          </p>
+
+          <button
+            v-on:click="addLessonToCart(lesson)"
+            v-if="canAddToTheCart(lesson)"
+          >
+            Add To Cart
+          </button>
+          <button disabled v-else>Sold Out</button>
+        </div>
+      </main>
+
+      <!-- this is the Checkout Page -->
+      <main v-else>
+        <h1 class="checkout-header">Welcome to the Checkout Page</h1>
+        <p class="cart-summary">
+          <strong
+            >Your current items in the cart are ({{ totalItemsInCart }} in
+            total)</strong
+          >
+        </p>
+
+        <ul>
+          <li v-for="lesson in cartItems" :key="lesson.id">
+            {{ lesson.title }} - £{{ lesson.price }} ({{ itemsInCart(lesson.id) }}x)
+            <button
+              class="remove-button"
+              v-on:click="removeLessonFromCart(lesson)"
+            >
+              Remove Item
+            </button>
+          </li>
+        </ul>
+
+        <!-- this is the Checkout Process Section -->
+        <h2 class="checkout-title">Checkout Process</h2>
+
+        <label for="name">Name:</label>
+        <input
+          type="text"
+          id="name"
+          v-model="checkoutName"
+          placeholder="Enter your name"
+        />
+
+        <label for="phone">Phone Number:</label>
+        <input
+          type="text"
+          id="phone"
+          v-model="checkoutPhone"
+          placeholder="Enter correct number"
+        />
+
+        <!-- this is the Order Info Section -->
+        <h2 class="order-info-title">Order Information</h2>
+        <p><strong>Name:</strong> {{ checkoutName }}</p>
+        <p><strong>Phone:</strong> {{ checkoutPhone }}</p>
+
+        <button
+          class="place-order-button"
+          :disabled="!isFormValid"
+          v-on:click="placeOrder"
+        >
+          Place Order
+        </button>
+      </main>
+    </div>
+
+    <script>
+      new Vue({
+        el: "#app",
+        data: {
+          searchFilter: "",
+          nameOfSite: "After School Lessons",
+          isCheckout: false,
+          sharedCart: [],
+          checkoutName: "",
+          checkoutPhone: "",
+          sortAttribute: "title",
+          sortOrder: "asc",
+          lessons: [
+            {
+              id: 1,
+              title: "Art Class",
+              description: "Fun art class",
+              price: 50,
+              image: "images/art.jpg",
+              availableStock: 7,
+              location: "London",
+            },
+            {
+              id: 2,
+              title: "Biology Class",
+              description: "Fun biology adventures",
+              price: 60,
+              image: "images/biology.jpg",
+              availableStock: 9,
+              location: "Birmingham",
+            },
+            {
+              id: 3,
+              title: "Business Class",
+              description: "Learn business fundamentals",
+              price: 60,
+              image: "images/business.jpg",
+              availableStock: 10,
+              location: "Manchester",
+            },
+            {
+              id: 4,
+              title: "Chemistry Class",
+              description: "Explore chemical reactions",
+              price: 60,
+              image: "images/chemistry.jpg",
+              availableStock: 8,
+              location: "Leeds",
+            },
+            {
+              id: 5,
+              title: "Physics Class",
+              description: "Discover the laws of nature",
+              price: 60,
+              image: "images/physics.jpg",
+              availableStock: 12,
+              location: "Sheffield",
+            },
+            {
+              id: 6,
+              title: "English Class",
+              description: "Improve language skills",
+              price: 60,
+              image: "images/english.jpg",
+              availableStock: 13,
+              location: "Liverpool",
+            },
+            {
+              id: 7,
+              title: "Sport Science Class",
+              description: "Stay active and fit",
+              price: 60,
+              image: "images/sportScience.jpg",
+              availableStock: 14,
+              location: "Glasgow",
+            },
+            {
+              id: 8,
+              title: "Computer Science Class",
+              description: "Learn coding and programming",
+              price: 60,
+              image: "images/ComputerScience.jpg",
+              availableStock: 15,
+              location: "Bristol",
+            },
+            {
+              id: 9,
+              title: "history class",
+              description: "Learn maths",
+              price: 69,
+              image: "images/history.jpg",
+              availableStock: 23,
+              location: "Nottingham",
+            },
+            {
+              id: 10,
+              title: "maths class",
+              description: "Learn maths",
+              price: 72,
+              image: "images/math.jpg",
+              availableStock: 19,
+              location: "Leicester",
+            },
+          ],
+        },
+        methods: {
+          addLessonToCart(lesson) {
+            this.sharedCart.push(lesson.id);
+          },
+          removeLessonFromCart(lesson) {
+            let index = this.sharedCart.indexOf(lesson.id);
+            if (index !== -1) {
+              this.sharedCart.splice(index, 1);
+            }
+          },
+          canAddToTheCart(lesson) {
+            return this.itemsInCart(lesson.id) < lesson.availableStock;
+          },
+          itemsInCart(lessonId) {
+            return this.sharedCart.filter((id) => id === lessonId).length;
+          },
+          toggleCheckout() {
+            this.isCheckout = !this.isCheckout;
+          },
+          placeOrder() {
+            alert("Your order is successful!");
+          },
+          setSortAttribute(attribute) {
+            this.sortAttribute = attribute;
+          },
+          setSortOrder(order) {
+            this.sortOrder = order;
+          },
+        },
+        computed: {
+          totalItemsInCart() {
+            return this.sharedCart.length;
+          },
+          filteredSearch() {
+            const query = this.searchFilter.toLowerCase();
+            return this.sortedLessons.filter((lesson) => {
+              return (
+                lesson.title.toLowerCase().includes(query) ||
+                lesson.description.toLowerCase().includes(query) ||
+                lesson.location.toLowerCase().includes(query) ||
+                lesson.price.toString().includes(query) ||
+                (lesson.availableStock - this.itemsInCart(lesson.id)).toString().includes(query)
+              );
+            });
+          },
+          cartItems() {
+            let cartSummary = {};
+            this.sharedCart.forEach((id) => {
+              let lesson = this.lessons.find((l) => l.id === id);
+              if (lesson) {
+                if (!cartSummary[id]) {
+                  cartSummary[id] = { ...lesson, quantity: 1 };
+                } else {
+                  cartSummary[id].quantity += 1;
+                }
+              }
+            });
+            return Object.values(cartSummary);
+          },
+          isFormValid() {
+            const nameRegex = /^[A-Za-z]+$/;
+            const phoneRegex = /^[0-9]+$/;
+            return (
+              nameRegex.test(this.checkoutName) &&
+              phoneRegex.test(this.checkoutPhone)
+            );
+          },
+          sortedLessons() {
+            return [...this.lessons].sort((a, b) => {
+              let modifier = this.sortOrder === "asc" ? 1 : -1;
+              if (typeof a[this.sortAttribute] === "string") {
+                return (
+                  a[this.sortAttribute].localeCompare(b[this.sortAttribute]) *
+                  modifier
+                );
+              }
+              return (
+                (a[this.sortAttribute] - b[this.sortAttribute]) * modifier
+              );
+            });
+          },
+        },
+      });
+    </script>
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+      header {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      .checkout-button {
+        display: block;
+        width: 150px;
+        padding: 10px;
+        margin: 0 auto 20px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+      .lesson-box {
+        width: 300px;
+        padding: 15px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background: #f9f9f9;
+      }
+      img {
+        width: 100%;
+        height: auto;
+      }
+      button {
+        width: 67%;
+        padding: 10px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      h1 {
+        font-size: 30px;
+        font-weight: bold;
+      }
+      h2 {
+        font-size: 18px;
+        font-weight: normal;
+      }
+      .sorting-section {
+        margin-bottom: 15px;
+      }
+      .sorting-section h2 {
+        font-size: 16px;
+        margin-bottom: 5px;
+      }
+      .sorting-section button {
+        font-size: 14px;
+        padding: 5px 10px;
+        margin: 3px;
+        border: 1px solid #040000;
+        background-color: #ffffff;
+        cursor: pointer;
+        border-radius: 4px;
+      }
+      .sorting-section button:hover {
+        background-color: #e0e0e0;
+      }
+      input[type="text"] {
+        padding: 12px 20px;
+        font-size: 16px;
+        width: 300px;
+        border: 2px solid #ccc;
+        border-radius: 50px;
+        outline: none;
+        transition: border-color 0.3s;
+        display: block;
+      }
+      input[type="text"]:focus {
+        border-color: #007BFF;
+      }
+    </style>
+  </body>
+</html>
