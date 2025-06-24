@@ -23,7 +23,8 @@
         <h1>{{ nameOfSite }}</h1>
       </header>
 
-      <button class="checkout-button" v-on:click="toggleCheckout">
+      <!-- Updated Checkout Button -->
+      <button class="checkout-button" v-on:click="toggleCheckout" :disabled="sharedCart.length === 0">
         {{ totalItemsInCart }}
         <span class="fa-solid fa-cart-shopping"></span>
         {{ isCheckout ? "Go Back" : "Checkout" }}
@@ -143,7 +144,7 @@
               title: "Art Class",
               description: "Fun art class",
               price: 50,
-              image: "art.jpg",
+              image: "images/art.jpg",
               availableStock: 7,
               location: "London",
             },
@@ -152,7 +153,7 @@
               title: "Biology Class",
               description: "Fun biology adventures",
               price: 60,
-              image: "biology.jpg",
+              image: "images/biology.jpg",
               availableStock: 9,
               location: "Birmingham",
             },
@@ -161,7 +162,7 @@
               title: "Business Class",
               description: "Learn business fundamentals",
               price: 60,
-              image: "business.jpg",
+              image: "images/business.jpg",
               availableStock: 10,
               location: "Manchester",
             },
@@ -170,7 +171,7 @@
               title: "Chemistry Class",
               description: "Explore chemical reactions",
               price: 60,
-              image: "chemistry.jpg",
+              image: "images/chemistry.jpg",
               availableStock: 8,
               location: "Leeds",
             },
@@ -179,7 +180,7 @@
               title: "Physics Class",
               description: "Discover the laws of nature",
               price: 60,
-              image: "physics.JPG",
+              image: "images/physics.JPG",
               availableStock: 12,
               location: "Sheffield",
             },
@@ -188,7 +189,7 @@
               title: "English Class",
               description: "Improve language skills",
               price: 60,
-              image: "english.jpg",
+              image: "images/english.jpg",
               availableStock: 13,
               location: "Liverpool",
             },
@@ -197,7 +198,7 @@
               title: "Sport Science Class",
               description: "Stay active and fit",
               price: 60,
-              image: "sportScience.jpg",
+              image: "images/sportScience.jpg",
               availableStock: 14,
               location: "Glasgow",
             },
@@ -206,7 +207,7 @@
               title: "Computer Science Class",
               description: "Learn coding and programming",
               price: 60,
-              image: "computerScience.jpg",
+              image: "images/computerScience.jpg",
               availableStock: 15,
               location: "Bristol",
             },
@@ -215,7 +216,7 @@
               title: "history class",
               description: "Learn maths",
               price: 69,
-              image: "history.jpg",
+              image: "images/history.jpg",
               availableStock: 23,
               location: "Nottingham",
             },
@@ -224,7 +225,7 @@
               title: "maths class",
               description: "Learn maths",
               price: 72,
-              image: "math.jpg",
+              image: "images/math.jpg",
               availableStock: 19,
               location: "Leicester",
             },
@@ -392,4 +393,3 @@
     </style>
   </body>
 </html>
-
